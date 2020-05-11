@@ -18,8 +18,15 @@ fn main() -> ! {
         lcd.begin();
         lcd.cursor();
         lcd.blinkon();
-        for byte in b"Hello World My Job Done!!"{
+        lcd.Line2(0u8,2u8);
+        for byte in b"Hello Rust World"{
             lcd.write(u8::from(*byte));
+
+        }
+        lcd.Line1(1u8,2u8);
+        for byte in b"My Job Done!!!"{
+            lcd.write(u8::from(*byte));
+
         }
         
 
@@ -77,6 +84,13 @@ impl <'a,'b> LiquidCrystal_I2C <'a,'b>{
     fn blinkon(&mut self){
         let displaycontrol:u8 = 0x04 | 0x02 | 0x01;
         self.command(0x08 | displaycontrol)
+    }
+    fn Line1(&mut self,col:u8,rows:u8){
+        self.command(0x80 | (col + 0x00))
+    }
+    fn Line2(&mut self,col:u8,rows:u8){
+        let mut row :usize = rows as usize;
+        self.command(0x80 | (col + 0x40))
     }
     fn command(&mut self,value:u8){
         self.send(value, 0)
