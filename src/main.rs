@@ -11,20 +11,17 @@ use aux14::{entry, iprint, iprintln, Delay,i2c1,prelude::*};
 fn main() -> ! {
 
     let (i2c1, mut delay, mut itm) = aux14::init();
-    i2c1.cr2.write(|w| {
-        w.start().set_bit();
-        w.sadd1().bits(0x3F);
-        w.rd_wrn().clear_bit();
-        w.nbytes().bits(8);
-        w.autoend().clear_bit()
-    });
-    while i2c1.isr.read().txis().bit_is_clear() {};
+   
 
         let mut lcd = LiquidCrystal_I2C::new(0x3F, 16, 2,&mut delay, i2c1);
         
         lcd.begin();
         lcd.cursor();
         lcd.blinkon();
+        for byte in b"Hello World My Job Done!!"{
+            lcd.write(u8::from(*byte));
+        }
+        
 
     loop {}
 }
@@ -90,19 +87,24 @@ impl <'a,'b> LiquidCrystal_I2C <'a,'b>{
         self.write4bits(highnib|mode);
         self.write4bits(lownib|mode);
     }
+    fn write(&mut self, value:u8)->u8{
+        let Rs= 0b00000001;
+        self.send(value,Rs);
+        1
+    }
     fn write4bits(&mut self,value:u8){
         self.expanderWrite(value);
 	    self.pulseEnable(value);
     }
     fn expanderWrite(&self,data:u8){
-        // self.i2c1.cr2.write(|w| {
-        //     w.start().set_bit();
-        //     w.sadd1().bits(0x3F);
-        //     w.rd_wrn().clear_bit();
-        //     w.nbytes().bits(1);
-        //     w.autoend().clear_bit()
-        // });
-        // while self.i2c1.isr.read().txis().bit_is_clear() {};
+        self.i2c1.cr2.write(|w| {
+            w.start().set_bit();
+            w.sadd1().bits(0x3F);
+            w.rd_wrn().clear_bit();
+            w.nbytes().bits(1);
+            w.autoend().clear_bit()
+        });
+        while self.i2c1.isr.read().txis().bit_is_clear() {};
         self.i2c1.txdr.write(|w| w.txdata().bits( data | 0x08));
         while self.i2c1.isr.read().tc().bit_is_clear() {}
     }
@@ -120,7 +122,7 @@ impl <'a,'b> LiquidCrystal_I2C <'a,'b>{
 
     fn new(add:u8,cols:u8,rows:u8,delay:&'b mut Delay, i2c1:&'a i2c1::RegisterBlock )->LiquidCrystal_I2C<'a,'b>{
        
-        git init{
+        LiquidCrystal_I2C{
             add : add,
             cols : cols,
             rows : rows,
