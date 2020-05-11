@@ -18,16 +18,24 @@ fn main() -> ! {
         lcd.begin();
         lcd.cursor();
         lcd.blinkon();
-        lcd.Line2(0u8,2u8);
+        lcd.Line1(0u8);
         for byte in b"Hello Rust World"{
             lcd.write(u8::from(*byte));
 
         }
-        lcd.Line1(1u8,2u8);
+        lcd.Line2(1u8);
         for byte in b"My Job Done!!!"{
             lcd.write(u8::from(*byte));
 
         }
+        for i in 0..99999{}
+        lcd.clear();
+        lcd.Line1(0u8);
+        for byte in b"1234567890!@#$%^"{
+            lcd.write(u8::from(*byte));
+
+        }
+
         
 
     loop {}
@@ -85,11 +93,10 @@ impl <'a,'b> LiquidCrystal_I2C <'a,'b>{
         let displaycontrol:u8 = 0x04 | 0x02 | 0x01;
         self.command(0x08 | displaycontrol)
     }
-    fn Line1(&mut self,col:u8,rows:u8){
+    fn Line1(&mut self,col:u8){
         self.command(0x80 | (col + 0x00))
     }
-    fn Line2(&mut self,col:u8,rows:u8){
-        let mut row :usize = rows as usize;
+    fn Line2(&mut self,col:u8){
         self.command(0x80 | (col + 0x40))
     }
     fn command(&mut self,value:u8){
